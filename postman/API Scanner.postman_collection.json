@@ -1,0 +1,70 @@
+{
+	"info": {
+		"_postman_id": "98c038d8-b2d6-4fd4-a57c-8e67fa84cd17",
+		"name": "API Scanner",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/api-data",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api-data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get By ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/api-data/615870a1a64c7816e1fd6483",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api-data",
+						"615870a1a64c7816e1fd6483"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"api name\",\n    \"data\": \"GET /safe?email=aaa@gmail.com HTTP/1.1\\nHost: localhost:8080\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/api-data",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api-data"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
