@@ -1,4 +1,4 @@
-package constanta
+package constant
 
 const (
 	Topic = "scan"

@@ -7,7 +7,7 @@ import (
 	apidatarepo "github.com/beruangcoklat/api-scanner/api_data/repository"
 	apidatausecase "github.com/beruangcoklat/api-scanner/api_data/usecase"
 	"github.com/beruangcoklat/api-scanner/config"
-	"github.com/beruangcoklat/api-scanner/constanta"
+	"github.com/beruangcoklat/api-scanner/constant"
 	"github.com/beruangcoklat/api-scanner/domain"
 	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -43,7 +43,7 @@ func initMongo(ctx context.Context) error {
 func initKafka() {
 	kafkaWriter = kafka.NewWriter(kafka.WriterConfig{
 		Brokers: []string{config.GetConfig().KafkaBrokerAddr},
-		Topic:   constanta.Topic,
+		Topic:   constant.Topic,
 	})
 }
 
