@@ -65,6 +65,25 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Run Test",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/api-data/615980be0a7a548cf4a5aea9/scan",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"api-data",
+						"615980be0a7a548cf4a5aea9",
+						"scan"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
