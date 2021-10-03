@@ -39,6 +39,7 @@ func (h *apiDataHandler) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	param.ScanResult = []domain.APIDataScanResult{}
 	err = h.apiDataUsecase.Create(r.Context(), param)
 	if err != nil {
 		json.NewEncoder(w).Encode(ResponseError{Message: err.Error()})

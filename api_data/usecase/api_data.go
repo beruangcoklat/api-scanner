@@ -1,9 +1,15 @@
 package usecase
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"os"
+	"os/exec"
+	"strings"
+	"time"
 
+	"github.com/beruangcoklat/api-scanner/config"
 	"github.com/beruangcoklat/api-scanner/domain"
 )
 
@@ -55,7 +61,37 @@ func (uc *apiDataUsecase) Scan(ctx context.Context, id string) error {
 		return err
 	}
 
-	// TODO : run sqlmap
-	fmt.Printf("[%v]: %v\n", id, apiData.Data)
+	filepath := fmt.Sprintf("/tmp/%v", time.Now().Unix())
+	err = os.WriteFile(filepath, []byte(apiData.Data), 0644)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		os.Remove(filepath)
+	}()
+
+	command := fmt.Sprintf("python3 sqlmap.py -r %v --dbms=mysql --level=5 --risk=3 --flush-session --batch", filepath)
+	cmd := exec.CommandContext(ctx, "/bin/bash", "-c", command)
+	cmd.Dir = config.GetConfig().SqlmapPath
+
+	var outb bytes.Buffer
+	cmd.Stdout = &outb
+
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	log := outb.String()
+	err = uc.apiDataRepo.AddScanResult(ctx, id, domain.APIDataScanResult{
+		CreatedAt:    time.Now(),
+		Log:          log,
+		IsVulnerable: strings.Contains(log, "---"),
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

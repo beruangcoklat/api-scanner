@@ -28,13 +28,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{host}}/api-data/615870a1a64c7816e1fd6483",
+					"raw": "{{host}}/api-data/{{id}}",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
 						"api-data",
-						"615870a1a64c7816e1fd6483"
+						"{{id}}"
 					]
 				}
 			},
@@ -72,13 +72,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{host}}/api-data/615980be0a7a548cf4a5aea9/scan",
+					"raw": "{{host}}/api-data/{{id}}/scan",
 					"host": [
 						"{{host}}"
 					],
 					"path": [
 						"api-data",
-						"615980be0a7a548cf4a5aea9",
+						"{{id}}",
 						"scan"
 					]
 				}
