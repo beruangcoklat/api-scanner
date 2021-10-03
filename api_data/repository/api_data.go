@@ -4,18 +4,22 @@ import (
 	"context"
 
 	"github.com/beruangcoklat/api-scanner/domain"
+	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type apiDataRepository struct {
-	mongoDB *mongo.Database
+	mongoDB     *mongo.Database
+	kafkaWriter *kafka.Writer
 }
 
-func New(mongoDB *mongo.Database) domain.APIDataRepository {
+func New(mongoDB *mongo.Database, kafkaWriter *kafka.Writer) domain.APIDataRepository {
+
 	return &apiDataRepository{
-		mongoDB: mongoDB,
+		mongoDB:     mongoDB,
+		kafkaWriter: kafkaWriter,
 	}
 }
 
@@ -33,7 +37,7 @@ func (r *apiDataRepository) Create(ctx context.Context, data domain.APIData) (st
 	return objectID.Hex(), nil
 }
 
-func (r *apiDataRepository) AddTestResult(ctx context.Context, id string, data domain.APIDataTestResult) error {
+func (r *apiDataRepository) AddScanResult(ctx context.Context, id string, data domain.APIDataScanResult) error {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
@@ -41,7 +45,7 @@ func (r *apiDataRepository) AddTestResult(ctx context.Context, id string, data d
 
 	_, err = r.mongoDB.Collection("api_data").UpdateByID(ctx, objectID, bson.M{
 		"$push": bson.M{
-			"test_result": data,
+			"scan_result": data,
 		},
 	})
 	if err != nil {
@@ -86,4 +90,15 @@ func (r *apiDataRepository) GetByID(ctx context.Context, id string) (*domain.API
 	}
 
 	return data, nil
+}
+
+func (r *apiDataRepository) PublishScanMessage(ctx context.Context, id string) error {
+	err := r.kafkaWriter.WriteMessages(ctx, kafka.Message{
+		Key:   []byte(id),
+		Value: []byte(id),
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

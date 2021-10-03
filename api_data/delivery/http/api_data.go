@@ -20,6 +20,7 @@ func NewAPIDataHandler(router *mux.Router, apiDataUsecase domain.APIDataUsecase)
 	router.HandleFunc("/api-data", handler.create).Methods(http.MethodPost)
 	router.HandleFunc("/api-data", handler.get).Methods(http.MethodGet)
 	router.HandleFunc("/api-data/{id}", handler.getByID).Methods(http.MethodGet)
+	router.HandleFunc("/api-data/{id}/scan", handler.scan).Methods(http.MethodGet)
 }
 
 func (h *apiDataHandler) create(w http.ResponseWriter, r *http.Request) {
@@ -75,6 +76,22 @@ func (h *apiDataHandler) getByID(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("content-type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+func (h *apiDataHandler) scan(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err := h.apiDataUsecase.PublishScanMessage(r.Context(), id)
+	if err != nil {
+		json.NewEncoder(w).Encode(ResponseError{Message: err.Error()})
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 type ResponseError struct {

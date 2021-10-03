@@ -1,5 +1,5 @@
 gorun-http:
-	@go run app/main.go
+	@go run app/*.go --app=http
 
-gobuild:
-	@go run app/main.go
+gorun-kafka:
+	@go run app/*.go --app=kafka

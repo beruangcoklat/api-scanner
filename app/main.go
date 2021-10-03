@@ -2,21 +2,21 @@ package main
 
 import (
 	"context"
-	"log"
-	"net/http"
+	"flag"
 
-	apidatahandler "github.com/beruangcoklat/api-scanner/api_data/delivery/http"
 	apidatarepo "github.com/beruangcoklat/api-scanner/api_data/repository"
 	apidatausecase "github.com/beruangcoklat/api-scanner/api_data/usecase"
 	"github.com/beruangcoklat/api-scanner/config"
+	"github.com/beruangcoklat/api-scanner/constanta"
 	"github.com/beruangcoklat/api-scanner/domain"
-	"github.com/gorilla/mux"
+	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var (
 	mongoClient *mongo.Client
+	kafkaWriter *kafka.Writer
 
 	apiDataRepo domain.APIDataRepository
 	apiDataUc   domain.APIDataUsecase
@@ -40,55 +40,35 @@ func initMongo(ctx context.Context) error {
 	return nil
 }
 
+func initKafka() {
+	kafkaWriter = kafka.NewWriter(kafka.WriterConfig{
+		Brokers: []string{config.GetConfig().KafkaBrokerAddr},
+		Topic:   constanta.Topic,
+	})
+}
+
 func initRepo() {
 	var (
 		mongoDBName = config.GetConfig().MongoDbName
 	)
 
 	mongoDB := mongoClient.Database(mongoDBName)
-	apiDataRepo = apidatarepo.New(mongoDB)
+	apiDataRepo = apidatarepo.New(mongoDB, kafkaWriter)
 }
 
 func initUsecase() {
 	apiDataUc = apidatausecase.New(apiDataRepo)
 }
 
-func initHandler() {
-	var (
-		port = config.GetConfig().Port
-	)
-
-	router := mux.NewRouter()
-	apidatahandler.NewAPIDataHandler(router, apiDataUc)
-
-	log.Print("listen :" + port)
-	http.ListenAndServe(":"+port, router)
-}
-
 func main() {
-	var (
-		err error
-		ctx = context.Background()
-	)
+	var app string
+	flag.StringVar(&app, "app", "http", "app type (http/kafka)")
+	flag.Parse()
 
-	err = initConfig()
-	if err != nil {
-		log.Fatal(err)
+	switch app {
+	case "http":
+		runHTTP()
+	case "kafka":
+		runKafka()
 	}
-
-	err = initMongo(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer func() {
-		err = mongoClient.Disconnect(ctx)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	initRepo()
-	initUsecase()
-	initHandler()
 }

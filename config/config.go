@@ -5,12 +5,6 @@ import (
 	"os"
 )
 
-type Config struct {
-	Port        string `json:"port"`
-	MongoDbName string `json:"mongo_db_name"`
-	MongoURI    string `json:"mongo_uri"`
-}
-
 var cfg Config
 
 func Init(filepath string) error {
