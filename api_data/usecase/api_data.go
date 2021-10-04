@@ -73,6 +73,7 @@ func (uc *apiDataUsecase) Scan(ctx context.Context, id string) error {
 
 	command := fmt.Sprintf("python3 sqlmap.py -r %v --dbms=mysql --level=5 --risk=3 --flush-session --batch", filepath)
 	cmd := exec.CommandContext(ctx, "/bin/bash", "-c", command)
+	cmd.Stdin = os.Stdin
 	cmd.Dir = config.GetConfig().SqlmapPath
 
 	var outb bytes.Buffer
