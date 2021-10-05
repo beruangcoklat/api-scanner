@@ -28,6 +28,7 @@ type (
 		ID         string              `json:"id" bson:"_id,omitempty"`
 		Name       string              `json:"name" bson:"name"`
 		Data       string              `json:"data" bson:"data"`
+		DBMS       string              `json:"dbms" bson:"dbms"`
 		ScanResult []APIDataScanResult `json:"scan_result" bson:"scan_result"`
 	}
 

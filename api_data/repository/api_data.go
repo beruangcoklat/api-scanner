@@ -61,7 +61,7 @@ func (r *apiDataRepository) Get(ctx context.Context) ([]domain.APIData, error) {
 		return nil, err
 	}
 
-	var result []domain.APIData
+	result := []domain.APIData{}
 	err = cursor.All(ctx, &result)
 	if err != nil {
 		return nil, err

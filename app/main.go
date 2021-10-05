@@ -37,6 +37,11 @@ func initMongo(ctx context.Context) error {
 		return err
 	}
 
+	err = mongoClient.Ping(ctx, nil)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

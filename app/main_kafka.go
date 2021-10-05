@@ -26,18 +26,12 @@ func runKafka() {
 		log.Fatal(err)
 	}
 
-	initKafka()
-
 	defer func() {
 		err = mongoClient.Disconnect(ctx)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = kafkaWriter.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
 	}()
 
 	initRepo()
