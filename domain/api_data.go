@@ -7,11 +7,19 @@ import (
 
 type (
 	APIDataRepository interface {
+		// mongo
 		Create(ctx context.Context, data APIData) (string, error)
 		AddScanResult(ctx context.Context, id string, data APIDataScanResult) error
 		Get(ctx context.Context) ([]APIData, error)
 		GetByID(ctx context.Context, id string) (*APIData, error)
+
+		// kafka
 		PublishScanMessage(ctx context.Context, id string) error
+
+		// redis
+		SetScanRunning(ctx context.Context, id string) (bool, error)
+		IsScanRunning(ctx context.Context, id string) (bool, error)
+		FinishScan(ctx context.Context, id string) error
 	}
 
 	APIDataUsecase interface {
@@ -20,6 +28,7 @@ type (
 		GetByID(ctx context.Context, id string) (*APIData, error)
 		PublishScanMessage(ctx context.Context, id string) error
 		Scan(ctx context.Context, id string) error
+		IsScanRunning(ctx context.Context, id string) (bool, error)
 	}
 )
 

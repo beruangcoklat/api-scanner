@@ -26,6 +26,11 @@ func runHTTP() {
 		log.Fatal(err)
 	}
 
+	err = initRedis(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	initKafka()
 
 	defer func() {
@@ -35,6 +40,11 @@ func runHTTP() {
 		}
 
 		err = kafkaWriter.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = redisClient.Close()
 		if err != nil {
 			log.Fatal(err)
 		}

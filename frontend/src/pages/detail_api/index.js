@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button } from 'react-bootstrap'
+import { Button, Badge } from 'react-bootstrap'
 
 export default function DetailAPIPage(props) {
 
   const [data, setData] = useState({})
   const params = useParams();
   const [activeLog, setActiveLog] = useState(-1)
+  const [isScanRunning, setIsScanRunning] = useState(false)
 
   useEffect(() => {
     fetch(`/api/api-data/${params.id}`, {
@@ -17,6 +18,18 @@ export default function DetailAPIPage(props) {
     })
       .then(r => r.json())
       .then(r => setData(r))
+
+
+    fetch(`/api/api-data/${params.id}/is-scan-running`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    })
+      .then(r => r.json())
+      .then(r => setIsScanRunning(r))
+
+
   }, [])
 
   const scan = () => {
@@ -58,9 +71,13 @@ export default function DetailAPIPage(props) {
           </tr>
           <tr>
             <td colSpan={2}>
-              <Button variant="primary" type="submit" onClick={scan}>
+              <Button variant="primary" type="submit" onClick={scan} disabled={isScanRunning}>
                 Scan
               </Button>
+              {
+                isScanRunning &&
+                <Badge bg="secondary" style={{ marginLeft: '10px' }}>Still Scanning</Badge>
+              }
             </td>
           </tr>
         </tbody>
@@ -79,7 +96,7 @@ export default function DetailAPIPage(props) {
               </label>
 
               <Button variant="primary" type="submit" onClick={() => updateActiveLog(key)}>
-                Scan
+                View
               </Button>
 
               {activeLog == key && <pre style={{ marginBottom: '100px' }} >{i.log}</pre>}

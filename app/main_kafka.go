@@ -26,12 +26,21 @@ func runKafka() {
 		log.Fatal(err)
 	}
 
+	err = initRedis(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	defer func() {
 		err = mongoClient.Disconnect(ctx)
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		err = redisClient.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}()
 
 	initRepo()

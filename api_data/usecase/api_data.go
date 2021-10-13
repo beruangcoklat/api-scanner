@@ -3,6 +3,7 @@ package usecase
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -48,8 +49,17 @@ func (uc *apiDataUsecase) Get(ctx context.Context) ([]domain.APIData, error) {
 }
 
 func (uc *apiDataUsecase) PublishScanMessage(ctx context.Context, id string) error {
-	err := uc.apiDataRepo.PublishScanMessage(ctx, id)
+	success, err := uc.apiDataRepo.SetScanRunning(ctx, id)
 	if err != nil {
+		return err
+	}
+	if !success {
+		return errors.New("scan already running")
+	}
+
+	err = uc.apiDataRepo.PublishScanMessage(ctx, id)
+	if err != nil {
+		uc.apiDataRepo.FinishScan(ctx, id)
 		return err
 	}
 	return nil
@@ -69,9 +79,10 @@ func (uc *apiDataUsecase) Scan(ctx context.Context, id string) error {
 
 	defer func() {
 		os.Remove(filepath)
+		uc.apiDataRepo.FinishScan(ctx, id)
 	}()
 
-	command := fmt.Sprintf("python3 sqlmap.py -r %v --dbms=mysql --level=5 --risk=3 --flush-session --batch", filepath)
+	command := fmt.Sprintf("python3 sqlmap.py -r %v --dbms=%v --level=5 --risk=3 --flush-session --batch", filepath, apiData.DBMS)
 	cmd := exec.CommandContext(ctx, "/bin/bash", "-c", command)
 	cmd.Stdin = os.Stdin
 	cmd.Dir = config.GetConfig().SqlmapPath
@@ -95,4 +106,12 @@ func (uc *apiDataUsecase) Scan(ctx context.Context, id string) error {
 	}
 
 	return nil
+}
+
+func (uc *apiDataUsecase) IsScanRunning(ctx context.Context, id string) (bool, error) {
+	isRunning, err := uc.apiDataRepo.IsScanRunning(ctx, id)
+	if err != nil {
+		return false, err
+	}
+	return isRunning, nil
 }

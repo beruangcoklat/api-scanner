@@ -9,6 +9,7 @@ import (
 	"github.com/beruangcoklat/api-scanner/config"
 	"github.com/beruangcoklat/api-scanner/constant"
 	"github.com/beruangcoklat/api-scanner/domain"
+	"github.com/go-redis/redis/v8"
 	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -17,6 +18,7 @@ import (
 var (
 	mongoClient *mongo.Client
 	kafkaWriter *kafka.Writer
+	redisClient *redis.Client
 
 	apiDataRepo domain.APIDataRepository
 	apiDataUc   domain.APIDataUsecase
@@ -52,13 +54,33 @@ func initKafka() {
 	})
 }
 
+func initRedis(ctx context.Context) error {
+	var (
+		err           error
+		redisAddr     = config.GetConfig().RedisAddr
+		redisPassword = config.GetConfig().RedisPassword
+	)
+
+	redisClient = redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: redisPassword,
+	})
+
+	_, err = redisClient.Ping(ctx).Result()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func initRepo() {
 	var (
 		mongoDBName = config.GetConfig().MongoDbName
 	)
 
 	mongoDB := mongoClient.Database(mongoDBName)
-	apiDataRepo = apidatarepo.New(mongoDB, kafkaWriter)
+	apiDataRepo = apidatarepo.New(mongoDB, kafkaWriter, redisClient)
 }
 
 func initUsecase() {

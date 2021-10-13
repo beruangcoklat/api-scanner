@@ -6,4 +6,6 @@ type Config struct {
 	MongoURI        string `json:"mongo_uri"`
 	KafkaBrokerAddr string `json:"kafka_broker_addr"`
 	SqlmapPath      string `json:"sqlmap_path"`
+	RedisAddr       string `json:"redis_addr"`
+	RedisPassword   string `json:"redis_password"`
 }
