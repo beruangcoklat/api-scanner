@@ -6,4 +6,6 @@ Tech Stack
 * go
 * mongo
 * kafka
+* redis
 * sqlmap
+* react
